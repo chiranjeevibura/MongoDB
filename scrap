@@ -89,4 +89,8 @@ Best regards,
 
 ---
 
-Make sure to replace placeholders like `[Connector version]`, `[Spark version]`, and other details with the relevant information before sending. This should provide the MongoDB vendor with enough context to understand and help resolve the issue.
+transform_df = transform_df.withColumn(
+    'columnName',
+    F.when(F.col('columnName').isNull(), F.lit(" "))  # Replace null with a space
+    .otherwise(F.col('columnName'))  # Otherwise keep the original value
+)

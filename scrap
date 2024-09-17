@@ -4,3 +4,23 @@ Summary:
 If lit("").cast(StringType()) causes issues with MongoDB, use a single space (" ") as a fallback.
 Empty strings may cause problems when MongoDB tries to convert them into BSON, but single spaces are usually safe.
 For now, try using a single space (" ") as the placeholder if empty strings are not working.
+
+
+
+# Apply the transformations
+result_df = df.withColumn(
+    "documentBaseName",
+    when(
+        col("documentTitle").isNotNull() & (locate('.', col("documentTitle")) > 0),
+        expr("substring(documentTitle, 1, length(documentTitle) - locate('.', reverse(documentTitle)))")
+    ).when(
+        col("documentTitle").isNotNull() & (locate('.', col("documentTitle")) == 0),
+        col("documentTitle")
+    ).otherwise(None)
+).withColumn(
+    "documentExtension",
+    when(
+        col("documentTitle").isNotNull() & (locate('.', col("documentTitle")) > 0),
+        truncate_extension_udf(substring_index(col("documentTitle"), ".", -1))
+    ).otherwise(mime_type_udf(col("mimeType")))
+)

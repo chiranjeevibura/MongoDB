@@ -1,4 +1,4 @@
-If you must have the empty string but MongoDB doesn’t accept it, you could introduce a preprocessing step to handle empty strings in a special way before writing to MongoDB. For example, treat empty strings as a special flag or replace them with a string MongoDB will accept (like a single space or a placeholder) and handle that in your application logic.
+/If you must have the empty string but MongoDB doesn’t accept it, you could introduce a preprocessing step to handle empty strings in a special way before writing to MongoDB. For example, treat empty strings as a special flag or replace them with a string MongoDB will accept (like a single space or a placeholder) and handle that in your application logic.
 
 Summary:
 If lit("").cast(StringType()) causes issues with MongoDB, use a single space (" ") as a fallback.
@@ -24,3 +24,69 @@ result_df = df.withColumn(
         truncate_extension_udf(substring_index(col("documentTitle"), ".", -1))
     ).otherwise(mime_type_udf(col("mimeType")))
 )
+
+
+.withColumn(
+    "documentExtension",
+    when(
+        col("documentTitle").isNotNull() & (substring_index(col("documentTitle"), ".", -1) != col("documentTitle")),
+        substring_index(col("documentTitle"), ".", -1))
+    ).when(
+        col("documentTitle").isNotNull() & (locate('.', col("documentTitle")) > 0),
+        mime_type_udf(col("mimeType"))
+    )
+.otherwise(mime_type_udf(col("mimeType")))
+)
+
+
+
+Here's a template for reporting the issue to the MongoDB vendor:
+
+---
+
+**Subject:** Issue with BSON Conversion for Empty Strings in MongoDB Spark Connector
+
+Dear MongoDB Support Team,
+
+I hope this email finds you well. I am writing to report an issue that I encountered while using the MongoDB Spark Connector when attempting to insert empty strings (`""`) into a MongoDB collection.
+
+### Issue Description:
+When using Apache Spark to write data into MongoDB, I encountered the following error when trying to set a field to an empty string (`""`):
+
+```
+com.mongodb.spark.sql.connector.exceptions.DataException: Cannot cast into a BsonValue. StringType has no matching BsonValue. Error: String index out of range: 0
+```
+
+This occurs specifically when the field in question contains an empty string, which appears to be problematic for the BSON conversion process. It appears that the MongoDB Spark Connector does not support handling empty strings as valid BSON values.
+
+### Steps to Reproduce:
+1. Configure Apache Spark with the MongoDB Spark Connector.
+2. Attempt to write a DataFrame with an empty string (`""`) value in one or more columns to MongoDB.
+3. The operation results in the above `DataException`.
+
+### Workaround:
+As a temporary solution, I’ve replaced empty strings with a single space (`" "`) or a placeholder like `"EMPTY_STRING"`, which avoids the BSON conversion error. However, this is not ideal for scenarios where an actual empty string needs to be stored.
+
+### Expected Behavior:
+The MongoDB Spark Connector should be able to handle empty strings (`""`) and store them in MongoDB collections without conversion errors.
+
+### Environment Details:
+- **MongoDB Spark Connector Version**: [Connector version]
+- **Apache Spark Version**: [Spark version]
+- **MongoDB Version**: [MongoDB version]
+- **Cluster/Deployment Type**: [Standalone/Replica set/Cluster]
+- **Configuration Settings**: Set `"spark.mongodb.write.convertJson"` as `"object_Or_Arrat_Only"`.
+
+I kindly request assistance in addressing this issue or guidance on any configuration or potential workaround that can allow handling of empty strings directly.
+
+Thank you for your support, and I look forward to your response.
+
+Best regards,  
+[Your Full Name]  
+[Your Position/Role]  
+[Your Company/Organization]  
+[Your Contact Information]
+
+---
+
+Make sure to replace placeholders like `[Connector version]`, `[Spark version]`, and other details with the relevant information before sending. This should provide the MongoDB vendor with enough context to understand and help resolve the issue.

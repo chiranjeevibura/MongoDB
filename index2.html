@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Management Platform</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>Data Management Platform</h1>
+  </header>
+
+  <div class="container">
+
+    <!-- Left Panel with Navigation -->
+    <nav class="left-pane">
+      <ul>
+        <li><a href="#" id="home-link">Home</a></li>
+        <li>
+          <a href="#" id="migration-link">Data Migration</a>
+          <ul id="migration-options">
+            <li><a href="#" id="historical-link">Historical Migration</a></li>
+            <li><a href="#" id="incremental-link">Incremental Migration</a></li>
+            <li><a href="#" id="delta-link">Delta Migration</a></li>
+          </ul>
+        </li>
+        <li><a href="#" id="correction-link">Data Correction</a></li>
+        <li><a href="#" id="analysis-link">Data Analysis</a></li>
+        <li><a href="#" id="dashboard-link">Dashboard</a></li>
+      </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <section class="main-content">
+      <div id="home" class="content-section">
+        <h2>Welcome to the Data Management Platform</h2>
+        <p>This platform supports data migration, data correction, data analysis, and provides a dashboard to monitor ongoing tasks.</p>
+      </div>
+
+      <!-- Data Migration Section -->
+      <div id="migration" class="content-section hidden">
+        <h2>Data Migration</h2>
+        <form id="migration-form">
+          <label for="source-datasource">Source Datasource:</label>
+          <select id="source-datasource">
+            <option value="oracle">Oracle</option>
+            <option value="mysql">MySQL</option>
+            <option value="postgres">PostgreSQL</option>
+          </select>
+
+          <label for="target-datasource">Target Datasource:</label>
+          <select id="target-datasource">
+            <option value="mongo">MongoDB</option>
+            <option value="fileNet">FileNet P8</option>
+          </select>
+
+          <label for="mapping">Mapping:</label>
+          <select id="mapping">
+            <option value="auto">Automatic Mapping</option>
+            <option value="manual">Manual Mapping</option>
+          </select>
+
+          <div class="button-group">
+            <button type="button" id="start-btn">Start Migration</button>
+            <button type="button" id="stop-btn">Stop Migration</button>
+            <button type="button" id="status-btn">Check Status</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Data Correction Section -->
+      <div id="correction" class="content-section hidden">
+        <h2>Data Correction</h2>
+        <form id="correction-form">
+          <label for="environment">Environment:</label>
+          <select id="environment">
+            <option value="dev">Development</option>
+            <option value="prod">Production</option>
+          </select>
+
+          <label for="database">Database:</label>
+          <input type="text" id="database" placeholder="Database Name">
+
+          <label for="collection">Collection:</label>
+          <input type="text" id="collection" placeholder="Collection Name">
+
+          <label for="filter">Filter:</label>
+          <input type="text" id="filter" placeholder="Filter Criteria">
+
+          <label for="target-value">Target Value:</label>
+          <input type="text" id="target-value" placeholder="Target Value">
+
+          <button type="button" id="update-btn">Update</button>
+        </form>
+      </div>
+
+      <!-- Data Analysis Section -->
+      <div id="analysis" class="content-section hidden">
+        <h2>Data Analysis</h2>
+        <form id="analysis-form">
+          <label for="analysis-source-datasource">Source Datasource:</label>
+          <select id="analysis-source-datasource">
+            <option value="oracle">Oracle</option>
+            <option value="mysql">MySQL</option>
+            <option value="postgres">PostgreSQL</option>
+          </select>
+
+          <button type="button" id="validate-source-btn">Validate Source</button>
+          <button type="button" id="recommend-mapping-btn">Recommend Mapping</button>
+        </form>
+      </div>
+
+      <!-- Dashboard Section -->
+      <div id="dashboard" class="content-section hidden">
+        <h2>Dashboard</h2>
+        <p>Here you can monitor your ongoing jobs and see their progress.</p>
+        <!-- Add future dashboard elements here -->
+      </div>
+
+    </section>
+
+  </div>
+
+  <footer>
+    <p>&copy; 2024 Data Management Platform</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

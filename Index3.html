@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Migration UI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .header {
+      background-color: #333;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    .container {
+      display: flex;
+    }
+    .left-pane {
+      width: 20%;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    .right-pane {
+      width: 80%;
+      padding: 20px;
+    }
+    .left-pane a {
+      display: block;
+      padding: 10px;
+      margin-bottom: 10px;
+      color: #333;
+      text-decoration: none;
+    }
+    .left-pane a:hover {
+      background-color: #ddd;
+    }
+    h2 {
+      color: #333;
+    }
+    .chatbot {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #333;
+      color: white;
+      border-radius: 10px;
+      padding: 10px;
+      cursor: pointer;
+    }
+    .chatbot-box {
+      display: none;
+      position: fixed;
+      bottom: 70px;
+      right: 20px;
+      width: 300px;
+      background-color: white;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .chatbot-header {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      border-radius: 10px 10px 0 0;
+    }
+    .chatbot-content {
+      height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    .chatbot-input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Data Migration Project</h1>
+</div>
+
+<div class="container">
+  <div class="left-pane">
+    <h2>Navigation</h2>
+    <a href="#data-migration">Data Migration</a>
+    <a href="#data-correction">Data Correction</a>
+    <a href="#data-analysis">Data Analysis</a>
+    <a href="#dashboard">Dashboard</a>
+  </div>
+
+  <div class="right-pane" id="content-area">
+    <!-- Home Page Section -->
+    <section id="home">
+      <h2>Welcome to Data Migration Project</h2>
+      <p>This tool provides an interface to manage your data migration needs including:</p>
+      <ul>
+        <li>Handling various data migration types</li>
+        <li>Data correction for target databases</li>
+        <li>Data analysis and recommendations</li>
+        <li>Progress tracking and monitoring via dashboards</li>
+      </ul>
+    </section>
+
+    <!-- Data Migration Section -->
+    <section id="data-migration" style="display:none;">
+      <h2>Data Migration</h2>
+      <p>Choose your migration type:</p>
+      <select id="migration-type">
+        <option>Historical Migration</option>
+        <option>Incremental Migration</option>
+        <option>Delta Migration</option>
+      </select>
+
+      <h3>Migration Details</h3>
+      <label for="source-db">Source Database:</label>
+      <select id="source-db">
+        <option>Oracle Database</option>
+        <option>MySQL Database</option>
+      </select>
+
+      <label for="target-db">Target Database:</label>
+      <select id="target-db">
+        <option>MongoDB</option>
+        <option>PostgreSQL</option>
+      </select>
+
+      <label for="mapping">Mapping:</label>
+      <select id="mapping">
+        <option>Manual Mapping</option>
+        <option>Auto Mapping</option>
+      </select>
+
+      <div>
+        <button id="start-btn">Start Migration</button>
+        <button id="stop-btn">Stop Migration</button>
+        <button id="status-btn">Check Status</button>
+      </div>
+    </section>
+
+    <!-- Data Correction Section -->
+    <section id="data-correction" style="display:none;">
+      <h2>Data Correction</h2>
+      <label for="environment">Environment:</label>
+      <select id="environment">
+        <option>Production</option>
+        <option>Testing</option>
+        <option>Development</option>
+      </select>
+
+      <label for="database">Database:</label>
+      <input type="text" id="database" placeholder="Enter Database Name">
+
+      <label for="collection">Collection:</label>
+      <input type="text" id="collection" placeholder="Enter Collection Name">
+
+      <label for="filter">Filter:</label>
+      <input type="text" id="filter" placeholder="Enter Filter Condition">
+
+      <label for="target-value">Target Value:</label>
+      <input type="text" id="target-value" placeholder="Enter Target Value">
+
+      <div>
+        <button id="update-btn">Update Data</button>
+      </div>
+    </section>
+
+    <!-- Data Analysis Section -->
+    <section id="data-analysis" style="display:none;">
+      <h2>Data Analysis</h2>
+      <button id="validate-source-btn">Validate Source Data</button>
+      <button id="recommend-mapping-btn">Recommend Mapping</button>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section id="dashboard" style="display:none;">
+      <h2>Dashboard</h2>
+      <p>Job Scheduling and Monitoring functionality goes here.</p>
+    </section>
+  </div>
+</div>
+
+<!-- Chatbot -->
+<div class="chatbot" id="chatbot">Chat with us!</div>
+
+<div class="chatbot-box" id="chatbot-box">
+  <div class="chatbot-header">Chatbot Assistance</div>
+  <div class="chatbot-content" id="chatbot-content">
+    <p>Hello! How can I assist you?</p>
+  </div>
+  <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Type a message...">
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

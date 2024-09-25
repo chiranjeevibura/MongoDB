@@ -1,0 +1,88 @@
+/* General Styling */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #007BFF;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.container {
+  display: flex;
+  height: calc(100vh - 80px); /* Full height minus header/footer */
+}
+
+.left-pane {
+  background-color: #f4f4f4;
+  width: 200px;
+  padding: 20px;
+  border-right: 2px solid #ddd;
+}
+
+.left-pane ul {
+  list-style: none;
+  padding: 0;
+}
+
+.left-pane li {
+  margin-bottom: 10px;
+}
+
+.left-pane a {
+  text-decoration: none;
+  color: #333;
+}
+
+.left-pane ul ul {
+  margin-top: 10px;
+  margin-left: 15px;
+}
+
+.left-pane ul ul li {
+  margin-bottom: 5px;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+}
+
+.content-section {
+  display: none;
+}
+
+.hidden {
+  display: none;
+}
+
+.button-group {
+  margin-top: 20px;
+}
+
+button {
+  margin: 10px 5px;
+  padding: 10px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+footer {
+  text-align: center;
+  padding: 10px;
+  background-color: #007BFF;
+  color: white;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+}

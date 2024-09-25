@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Migration UI Demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>Data Migration UI POC</h1>
+  </header>
+
+  <section class="main-content">
+
+    <!-- Source Database Section -->
+    <div class="source-section">
+      <h2>Source Database</h2>
+      <select id="source-db">
+        <option value="oracle">Oracle</option>
+        <option value="mysql">MySQL</option>
+        <option value="postgres">PostgreSQL</option>
+      </select>
+      <button id="add-source-btn">Add Source</button>
+    </div>
+
+    <!-- Target Schema Section -->
+    <div class="target-section">
+      <h2>Target Schema</h2>
+      <div id="target-schema">
+        <input type="text" placeholder="Target Field 1">
+        <input type="text" placeholder="Target Field 2">
+        <button>Add Field</button>
+      </div>
+    </div>
+
+    <!-- Mapping and Transformation Section -->
+    <div class="mapping-section">
+      <h2>Map Fields</h2>
+      <button id="map-fields-btn">Map Fields</button>
+      <div id="mapping-result"></div>
+    </div>
+
+    <!-- Data Transformation Section -->
+    <div class="transformation-section">
+      <h2>Transform Data</h2>
+      <label><input type="checkbox" id="encrypt" /> Encryption</label>
+      <label><input type="checkbox" id="scale" /> Scaling</label>
+      <button id="transform-btn">Apply Transformation</button>
+      <div id="transform-result"></div>
+    </div>
+
+    <!-- Data Validation Section -->
+    <div class="validation-section">
+      <h2>Data Validation</h2>
+      <button id="validate-btn">Validate Data</button>
+      <div id="validation-result"></div>
+    </div>
+
+    <!-- Data Correction Section -->
+    <div class="correction-section">
+      <h2>Data Correction</h2>
+      <input type="text" placeholder="Correct Field">
+      <button id="correct-btn">Correct Data</button>
+      <div id="correction-result"></div>
+    </div>
+
+    <!-- Job Scheduling Section -->
+    <div class="schedule-section">
+      <h2>Job Scheduling</h2>
+      <label for="job-time">Schedule Time:</label>
+      <input type="time" id="job-time">
+      <button id="schedule-btn">Schedule Job</button>
+      <div id="schedule-result"></div>
+    </div>
+
+    <!-- Job Monitoring Section -->
+    <div class="monitoring-section">
+      <h2>Job Monitoring</h2>
+      <div id="job-status">
+        <p>Job Status: <span id="status">Idle</span></p>
+        <div class="progress-bar">
+          <div class="progress"></div>
+        </div>
+      </div>
+      <button id="monitor-btn">Start Job</button>
+    </div>
+
+  </section>
+
+  <!-- Chatbot Section -->
+  <div class="chatbot">
+    <div class="chat-header">Chatbot Assistant</div>
+    <div class="chat-body">
+      <p>Hi! How can I help you today?</p>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chat-input-box" placeholder="Type your question...">
+      <button id="send-btn">Send</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 Migration Project</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

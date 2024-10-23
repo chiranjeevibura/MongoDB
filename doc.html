@@ -1,0 +1,354 @@
+Detailed Documentation for Apache Spark Migration Tool: FileNet P8 (Oracle) to CDL (MongoDB)
+Overview
+This documentation provides an in depth explanation of the Apache Spark migration tool built to migrate data from FileNet P8 (Oracle Database) to CDL (MongoDB). The process includes three main stages: Batch Creation, Migration, and Reconciliation. This document covers the purpose, design, infrastructure setup, and steps for each phase, including details on configurations, key considerations, and issue resolutions.
+1. Migration Process Outline
+1.1 Batch Creation
+Purpose: Split source data from FileNet P8 (Oracle Database) into batches based on a defined size and create_date for efficient processing.
+Steps Involved:
+Reading Source Data: Fetch data from the FileNet P8 database based on the create_date column.
+Batch Splitting: Split the data into batches of a defined size (e.g., 50,000 documents) based on create_date.
+Batch ID Assignment: Assign a unique UUID as the batch identifier for each batch.
+Batch Metadata Storage: Store the batch metadata, including Batch ID, Batch Start Date, Batch End Date, and Batch Creation Date in a batch table.
+Prerequisites: Create a Batch Table in the batch database with the following columns:
+Batch ID (UUID)
+Batch Start Date (TIMESTAMP)
+Batch End Date (TIMESTAMP)
+Batch Creation Date (TIMESTAMP)
+Migration Date (TIMESTAMP)
+Reconcile Source Count (NUMBER)
+Reconcile Target Count (NUMBER)
+Content Path Validation (VARCHAR)
+Note: The columns Migration Date, Reconcile Source Count, Reconcile Target Count, and Content Path Validation will be updated during the Migration and Reconciliation steps.
+1.2 Migration
+Purpose: Migrate data from FileNet P8 (Oracle Database) to CDL (MongoDB) using the batch table metadata for processing.
+Steps Involved:
+Reading Batch Metadata: Retrieve Batch ID, Batch Start Date, and Batch End Date from the batch table.
+Data Extraction: Extract data from FileNet P8 (Oracle) based on the Batch Start and End Dates.
+Transformations: Apply necessary data transformations, which may include:
+Constant definitions
+Data type conversions (e.g., strings to numeric and vice versa)
+Decrypting BLOB data in Oracle to clear text for HCP storage details
+Data Loading: Load the transformed data into CDL (MongoDB).
+Update Batch Table: Set the Migration Date and mark the migration status for the batch.
+1.3 Reconciliation
+Purpose: Validate the data integrity between the source (FileNet P8) and target (CDL) after migration.
+Steps Involved:
+Reading Batch Metadata: Retrieve Batch ID, Batch Start Date, and Batch End Date from the batch table.
+Data Count Comparison: Compare the data counts between the source and target for the given batch.
+Metadata Validation: Ensure metadata fields match between the source and target.
+Sample Data Retrieval: Perform data validation from the Hitachi Content Platform (HCP) for a sample of records (0.1% to 1% based on batch size).
+Update Batch Table: Record the results in the Reconcile Source Count, Reconcile Target Count, and Content Path Validation columns.
+2. Infrastructure Setup
+2.1 Migration Server
+Spark Servers: These servers run the Apache Spark jobs for migration.
+Java Version: [Specify Java version]
+Spark Version: [Specify Spark version]
+ojdbc Version: [Specify OJDBC version for Oracle connection]
+MongoDB Connector for Spark: [Specify version]
+Libraries and Dependencies:
+org.apache.spark:spark-core
+org.apache.spark:spark-sql
+org.mongodb.spark:mongo-spark-connector
+ojdbc for Oracle connections
+Log Locations: [Specify log file paths for Spark job logs, error logs, and batch logs]
+Important Files and Configurations:
+spark-defaults.conf: Contains default configurations for Spark jobs.
+migration.properties: Configuration file for migration parameters like batch size, source and target connection details.
+2.2 P8 Database Servers
+Database: Oracle database hosting FileNet P8 metadata and content details.
+Connection Details: JDBC URL, credentials, and relevant permissions required for reading and updating data.
+2.3 MongoDB Servers
+Database: CDL (MongoDB) serves as the target database for storing migrated data.
+Connection Details: MongoDB URI, credentials, and cluster setup information.
+2.4 HCP Details
+Platform: Hitachi Content Platform for managing content storage.
+Data Retrieval Approach: BLOB data is decrypted and transformed for HCP path validation during reconciliation.
+3. Defect Resolution Summary
+List of Key Defects and Fixes:
+Duplicate Ingestion Avoidance: Using UUID based on GUID resolved duplicate ingestion issues.
+Transformation Errors: Fixed data type mismatches during transformations.
+Data Retrieval Performance: Improved by using indexing and sample-based retrieval.
+4. Spark Side Onboarding Process
+The onboarding process is crucial for setting up the Spark environment and configuring the parameters needed to perform batch processing, migration, and reconciliation. Here’s a detailed breakdown of the onboarding steps and information required.
+4.1. Information Required for Batch, Migration, and Reconciliation Jobs
+Batch Size and Creation Criteria:
+Batch Size: Define a suitable batch size based on the data volume in the FileNet P8 database. The standard approach is to set the batch size at 50,000 records, which helps balance processing time and resource utilization.
+Creation Criteria: Batches are created based on the create_date field from the FileNet P8 database. Data is segmented by this date to ensure chronological order and even distribution across batches.
+UUID Assignment: Each batch is assigned a unique UUID for tracking. The UUID is generated based on the GUIDs from the records within the batch, ensuring data uniqueness.
+Source and Target Database Connection Details:
+Source Database (FileNet P8 - Oracle Database):
+Connection details including host, port, service name, user credentials, and any required connection parameters.
+Example configuration:
+bash
+Copy code
+jdbc:oracle:thin:@//source-host:1521/oracle-db
+
+
+Required libraries: OJDBC driver (ojdbc8.jar).
+Target Database (CDL - MongoDB):
+MongoDB connection details including cluster URI, database name, and collection name.
+Authentication credentials for accessing the MongoDB Atlas cluster.
+Example connection URI:
+bash
+Copy code
+mongodb+srv://user:password@cluster0.mongodb.net/databaseName
+
+
+Required libraries: MongoDB Spark Connector (mongo-spark-connector_2.12).
+Transformation Rules:
+Business-Specific Transformations: Different transformations may be required for various business rules, such as:
+Data Type Conversions: Convert data types as needed (e.g., strings to numeric values).
+String Manipulations: Perform transformations like trimming, concatenation, or splitting fields.
+Data Masking: Mask sensitive data fields based on the organization's security policies.
+Decryption: Decrypt data from the Oracle BLOB fields to plain text for usage in the migration (e.g., HCP content paths).
+Transformation Configurations: Maintain transformation rules in a excel file 
+Improvements in future release: Maintain transformation rules in a configuration file (e.g., transformation_rules.json), allowing for dynamic updates without changing the code.
+Log Configuration:
+Log File Locations: Define log directories for each job (batch creation, migration, reconciliation).
+Batch Job Logs: /var/logs/migration/batch_creation/
+Migration Job Logs: /var/logs/migration/execution/
+Reconciliation Job Logs: /var/logs/migration/reconciliation/
+Log Levels: Set appropriate logging levels (INFO, DEBUG, ERROR) for different stages of the process.
+Log Rotation and Retention: Implement log rotation policies to ensure that logs do not consume excessive disk space.
+HCP Credentials and Access Setup:
+HCP Account Credentials: Set up credentials for accessing the Hitachi Content Platform (HCP), including user account details and authentication tokens.
+HCP Access Permissions: Ensure the HCP account has the necessary permissions for content retrieval, validation, and logging.
+Access Configuration: Store HCP access details securely in environment variables or encrypted configuration files.
+
+5. Highlights of the Migration Process
+The migration process from FileNet P8 to CDL involves various key features and optimizations to ensure smooth execution, data integrity, and performance. Here are some highlights of the migration approach:
+5.1. UUID Generation
+Avoiding Duplicates: By generating a unique UUID for each batch based on the GUIDs of the records, the process ensures data uniqueness across batches. This approach helps in:
+Preventing Duplicate Ingestion: UUIDs act as unique identifiers for batches, avoiding repeated ingestion of the same data.
+Tracking Batch Progress: UUIDs make it easier to track the state of each batch (e.g., Created, In Progress, Completed, Failed) throughout the migration lifecycle.
+UUID Generation Logic: The UUID is generated using a hashing algorithm applied to a combination of GUIDs and batch-specific parameters (e.g., batch creation timestamp).
+5.2. Transformation Flexibility
+Adaptability to Business Rules: Transformation rules can be adjusted based on specific business requirements, making the solution flexible for different data domains.
+Configuration-Driven Approach: Transformation rules are stored in configuration files, allowing changes without code modifications. This reduces development overhead and minimizes the need for re-deployment.
+Dynamic Transformation Handling: The process can handle various types of data transformations, such as:
+Static Value Assignments: Default values or constants can be assigned to certain fields.
+Conditional Transformations: Apply rules based on specific conditions, such as field values or data types.
+Field Mapping: Map fields from the source data structure to the target structure according to pre-defined mappings.
+5.3. Sample-based Reconciliation
+Optimized Validation for Large Datasets: Given the large volume of data, performing 100% data retrieval for reconciliation is often impractical and time-consuming. A sample-based approach helps balance accuracy with performance.
+Sample Size Determination: The sample size for reconciliation can vary based on the batch size:
+Low Volume Batches: For smaller batches, up to 1% of the records may be retrieved for validation.
+High Volume Batches: For larger batches, a smaller percentage (e.g., 0.1%) may be sufficient for verification.
+Data Count Comparison: Reconciliation includes validating the total number of records migrated, as well as comparing metadata fields (e.g., creation date, document type).
+Metadata and Data Validation: The process verifies the consistency of metadata across source and target databases. For data retrieval from HCP, checks ensure that content paths and storage details are accurate.
+Handling Discrepancies: Any discrepancies found during reconciliation are logged for further investigation. This may involve manually reviewing the records, re-running the migration for specific batches, or updating transformation rules to address data format inconsistencies.
+These steps ensure the migration is robust, flexible to business changes, and maintains data integrity through structured validation mechanisms.
+6. Key Parameters and Configurations
+The key parameters and configurations for the data migration process are critical to ensure optimal performance, resource management, and monitoring during the migration from FileNet P8 (Oracle Database) to CDL (MongoDB). This section outlines the Spark settings, batch processing configurations, and monitoring tools.
+6.1. Spark Settings
+To optimize the Spark job performance for migration, specific settings need to be configured for memory allocation, number of executors, parallelism, and other key parameters. Below are the recommended settings:
+Memory Settings:
+Executor Memory: Allocate sufficient memory for each executor based on the expected data size and transformations. For large batches, consider:
+bash
+Copy code
+--executor-memory 8G
+Driver Memory: Allocate memory for the driver to manage metadata and job coordination. Example:
+bash
+Copy code
+--driver-memory 4G
+Executor Settings:
+Number of Executors: The number of executors should be set based on the available cluster resources and workload. For a medium-sized cluster:
+bash
+Copy code
+--num-executors 10
+Cores per Executor: Specify the number of cores per executor for parallel processing. Example:
+bash
+Copy code
+--executor-cores 4
+Dynamic Allocation: Enable dynamic allocation to scale the number of executors up or down based on the workload:
+bash
+Copy code
+--conf spark.dynamicAllocation.enabled=true
+--conf spark.dynamicAllocation.minExecutors=5
+--conf spark.dynamicAllocation.maxExecutors=20
+Parallelism Settings:
+Default Parallelism: Adjust the parallelism for distributed operations. Example:
+bash
+Copy code
+--conf spark.default.parallelism=100
+Shuffle Partitions: Configure the number of shuffle partitions based on data size to optimize performance during data shuffling operations:
+bash
+Copy code
+--conf spark.sql.shuffle.partitions=200
+6.2. Batch Processing Configurations
+Batch processing configurations govern how batches are handled during migration, including batch size, retry policies, and failure handling.
+Batch Size:
+Recommended Batch Size: Set the batch size to 50,000 records to balance processing time and resource usage.
+Batch Sizing Criteria: Based on the number of documents and distribution over time, adjust batch size if necessary to avoid large variations in data volume.
+Retry Policies:
+Retry Limit: Configure a retry limit for handling failures during migration. Example:
+bash
+Copy code
+--conf spark.task.maxFailures=4
+Backoff Strategy: Implement an exponential backoff strategy for retries, increasing the delay between each retry attempt.
+Failure Handling:
+Skip Faulty Records: If a record fails to process after multiple retries, log the error and skip the record to avoid halting the migration.
+Error Logging: Log detailed information for all failures, including batch ID, record details, and the nature of the error.
+Partial Batch Handling: If a batch fails, split it into smaller sub-batches and retry processing.
+Batch Table Configuration:
+Columns to Track Batch State: Ensure the batch table includes columns for tracking the state of each batch (e.g., In Progress, Completed, Failed) and retry attempts.
+Update Frequency: Update the batch table at the start and end of each batch, and whenever a retry occurs.
+6.3. Monitoring URLs
+Monitoring the migration jobs and database operations is crucial for timely issue detection and resolution. The following URLs provide access to key monitoring dashboards:
+Spark UI:
+URL: The Spark UI provides detailed information about running and completed Spark jobs, including stages, tasks, and executors.
+Example URL:
+arduino
+Copy code
+http://spark-master-node:4040
+
+
+Features: Monitor job stages, task completion times, executor memory usage, and shuffle read/write metrics.
+MongoDB Atlas Dashboard:
+URL: The MongoDB Atlas Dashboard provides monitoring for MongoDB clusters, including metrics such as database queries, memory usage, and connection statistics.
+Example URL:
+bash
+Copy code
+https://cloud.mongodb.com/v2/your-project-id#clusters/detail/Cluster0
+
+
+Features: Monitor write operations, active connections, data transfer rates, and database resource utilization.
+HCP Monitoring (if applicable):
+URL: The Hitachi Content Platform (HCP) monitoring URL provides visibility into storage operations, retrieval requests, and system health.
+Example URL:
+arduino
+Copy code
+https://hcp-admin.yourdomain.com:8000
+
+
+Features: Track content retrieval requests, response times, and storage capacity usage.
+6.4. Logging and Alerts
+Proper logging and alerting setup are crucial for identifying job issues and ensuring timely remediation.
+Logging Setup:
+Log Levels: Configure logging levels for different components (INFO, WARN, ERROR) to filter logs based on the severity of events.
+Log Locations: Specify directories for storing log files:
+Batch Logs: /var/logs/migration/batch/
+Migration Logs: /var/logs/migration/job/
+Reconciliation Logs: /var/logs/migration/reconciliation/
+Log Rotation: Implement log rotation to manage log file sizes and retain important logs.
+Alerts Setup:
+Job Completion Alerts: Configure alerts for job completions to notify the team when a batch, migration, or reconciliation process finishes.
+Error Alerts: Set up alerts for critical errors or repeated task failures. These can be configured to notify via email, Slack, or monitoring tools like Prometheus or Grafana.
+Reconciliation Failure Alerts: Set alerts to trigger if reconciliation results indicate mismatches or data retrieval issues.
+These configurations ensure the Spark jobs run efficiently, provide real-time monitoring capabilities, and alert the team to any issues, enabling a smooth migration process.
+
+7. Migration Execution Plan
+1. Pre-Migration Checklist
+Before initiating the migration, it is essential to ensure that all prerequisites are met. The following checklist outlines the necessary preparations:
+Verify Database Connectivity:
+FileNet P8 (Oracle Database): Test the JDBC connection to ensure read and write permissions are set up correctly for the source database.
+CDL (MongoDB): Verify MongoDB connectivity using the MongoDB URI and check that the necessary credentials and roles for data insertion are in place.
+Batch Table Readiness:
+Ensure the Batch Table Exists: Verify that the batch table is created in the database with the specified columns: Batch ID, Batch Start Date, Batch End Date, Batch Creation Date, Migration Date, Reconcile Source Count, Reconcile Target Count, and Content Path Validation.
+Check for Existing Batches: Confirm that there are no unprocessed or incomplete batches from previous runs.
+Indexing: Ensure the batch table has appropriate indexes on Batch ID, Batch Start Date, and Batch End Date for faster query performance.
+Access Permissions:
+Database User Roles: Ensure that the user executing the migration has appropriate read/write permissions in both FileNet P8 (Oracle) and MongoDB.
+HCP Access for Reconciliation: Confirm that the credentials for accessing the Hitachi Content Platform (HCP) are valid and have the required permissions for data retrieval and validation.
+Configuration Files Review:
+spark-defaults.conf: Review the Spark configuration file for resource allocation settings such as executor memory, number of cores, and parallelism settings.
+migration.properties: Check the migration properties file for correct parameter settings, such as batch size, source and target connection strings, transformation rules, and logging configuration.
+Monitoring and Logging Setup:
+Log File Directories: Ensure that directories for logging (job logs, error logs, and batch logs) are properly set up with adequate storage space.
+Alert Configurations: Verify that alerts are configured for job failures, batch completion, and reconciliation validation results.
+Infrastructure Health Check:
+Spark Cluster: Ensure all Spark nodes are up and running, and the cluster manager (YARN, Mesos, or Standalone) is operational.
+Network Connectivity: Confirm stable network connections between Spark, Oracle, MongoDB, and HCP.
+Resource Availability: Validate that sufficient resources (CPU, memory, and storage) are allocated for the migration jobs.
+2. Step-by-Step Migration Execution
+This section provides a detailed step-by-step approach for executing the migration, including command examples, scheduling, and parallelism settings.
+Start the Batch Creation Job:
+Command Example:
+bash
+Copy code
+spark-submit \
+  --class com.example.BatchCreation \
+  --master yarn \
+  --deploy-mode cluster \
+  --executor-memory 4G \
+  --num-executors 10 \
+  /path/to/migration.jar \
+  --batchSize=50000 \
+  --sourceJdbcUrl=jdbc:oracle:thin:@//host:port/sid \
+  --batchTable=batch_table_name
+
+
+Explanation: This command initiates the batch creation Spark job, which reads data from the FileNet P8 database, splits it into batches of the specified size (50,000), assigns a UUID to each batch, and stores the batch metadata in the batch table.
+Run the Migration Job:
+Command Example:
+bash
+Copy code
+spark-submit \
+  --class com.example.DataMigration \
+  --master yarn \
+  --deploy-mode cluster \
+  --executor-memory 8G \
+  --num-executors 15 \
+  /path/to/migration.jar \
+  --batchTable=batch_table_name \
+  --targetMongoUri=mongodb://user:password@host:port/database \
+  --transformRules=/path/to/transformations.json
+Explanation: This command runs the data migration job, which reads data from the batch table, extracts the relevant data from FileNet P8, applies transformations (e.g., data type conversions, constant definitions), and inserts the transformed data into MongoDB.
+Reconciliation Execution:
+Command Example:
+bash
+Copy code
+spark-submit \
+  --class com.example.Reconciliation \
+  --master yarn \
+  --deploy-mode cluster \
+  --executor-memory 6G \
+  --num-executors 10 \
+  /path/to/reconciliation.jar \
+  --batchTable=batch_table_name \
+  --hcpCredentials=/path/to/hcp_credentials.json \
+  --sampleRate=0.01
+Explanation: The reconciliation job reads batch metadata, compares data counts between FileNet P8 and MongoDB, validates metadata fields, and performs content validation for a sample of the data retrieved from HCP (e.g., 1% of the total records in the batch).
+Scheduling Information:
+Job Dependencies: Ensure that the Batch Creation job completes successfully before starting the Migration job. Similarly, ensure that the Migration job completes before initiating the Reconciliation job.
+Scheduling Frequency:
+Batch Creation Job: Scheduled to run once initially for the entire migration process.
+Migration Job: Runs for each batch sequentially or concurrently depending on the available resources.
+Reconciliation Job: Scheduled after the migration for each batch is completed.
+Parallelism and Resource Configuration:
+Batch Creation: Set parallelism based on the number of partitions in the source data table. Example: --conf spark.sql.shuffle.partitions=50.
+Migration: Configure the number of executors based on the expected data size. For example, increase num-executors to 15 for larger batches.
+Reconciliation: Use a lower number of executors to reduce resource consumption for sample-based validation.
+3. Post-Migration Validation
+Post-migration validation ensures the integrity of migrated data and verifies that all steps have been executed successfully.
+Review Reconciliation Results:
+Data Count Validation: Compare the source and target record counts for each batch.
+Source Count: Number of records in FileNet P8 (Oracle) for the given batch.
+Target Count: Number of records successfully inserted into MongoDB.
+Sample Data Retrieval Results: Verify that sampled records retrieved from HCP match between the source and the target. Validate key fields such as document path, metadata, and content integrity.
+Update Batch Table:
+Set Migration Date: Update the migration date column for each batch processed successfully.
+Reconcile Source and Target Counts: Record the counts for source and target data for future reference.
+Content Path Validation: Mark the validation result for sampled records as "Passed" or "Failed."
+Log and Report Generation:
+Log Review: Check job logs for any errors or warnings encountered during execution. Pay special attention to logs related to transformations, connectivity issues, or performance warnings.
+Report Summary: Generate a report summarizing:
+Total number of batches processed
+Number of records migrated
+Reconciliation results (success/failure rates, discrepancies)
+Any errors or anomalies detected
+Escalation and Issue Resolution:
+Identify Issues: If reconciliation results indicate data mismatches or missing records, investigate the root cause by reviewing job logs and transformation steps.
+Fix and Re-run: If necessary, fix identified issues and re-run the affected migration or reconciliation jobs for specific batches.
+Sign-Off and Handover:
+Sign-off from Data Owners: Obtain confirmation from stakeholders that the data migration and reconciliation are complete and accurate.
+Handover to Support Team: Provide the support team with documentation, including configurations, known issues, and troubleshooting steps.
+Operational Handover: Transition the responsibility for monitoring and maintaining the migrated data to the support team.
+Additional Considerations
+Backup Strategy: Take backups of critical data before starting migration and after completion.
+Performance Tuning: Adjust Spark configurations such as executor memory and shuffle partitions based on job performance.
+Monitoring: Set up real-time monitoring dashboards for tracking job status and resource utilization.
+The above steps ensure a smooth execution and transition during the migration process, providing a clear understanding of the workflow and responsibilities across teams.
+
+This documentation will help the support team, internal team, and senior leadership understand the technical details, infrastructure requirements, and effort involved in this migration project.
+
